@@ -1,0 +1,10 @@
+#no virtual envs.
+venv4*/
+
+#no logs.
+**/logs/*
+
+#no snapshots.
+**/snapshots/*
+
+
