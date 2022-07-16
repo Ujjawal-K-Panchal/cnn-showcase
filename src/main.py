@@ -14,8 +14,8 @@ from torchvision import transforms
 import model, pipeline
 
 #static vars.
-LR = 1E-4
-BS = 128
+LR = 1E-3
+BS = 512
 EPOCHS = 100
 DEVICE = "cpu" if not torch.cuda.is_available() else "cuda:0"
 NUMCHANNELS = 1
@@ -26,7 +26,10 @@ if __name__ == "__main__":
 	#1. load dataset.
 	train_set, test_set = pipeline.load_dataset(
 									DATASET,
-									transform = transforms.ToTensor(),
+									transform = transforms.Compose([
+													transforms.ToTensor(),
+													transforms.Normalize(0.1307, 0.3081),
+												])
 							)
 	print(f"Dataset: {type(train_set)=}")
 	print(f"Dataset sample: {type(train_set[0][0])=}, {train_set[0][0].size()=}")
@@ -45,6 +48,15 @@ if __name__ == "__main__":
 
 	#2. load our model.
 	model = pipeline.load_model(model.CNN, DEVICE, NUMCHANNELS)
+
+	#3. train our model with given iterable shards of batches.
+	model = pipeline.train(
+					model,
+					train_loader,
+					EPOCHS,
+					LR,
+					DEVICE,
+			)
 
 
 

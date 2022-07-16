@@ -9,3 +9,7 @@ venv4*/
 
 #no snapshots.
 **/snapshots/*
+
+#no python stuff.
+**/__pycache__/**
+*.pyc

@@ -7,12 +7,15 @@ Created on Mon Jul 16 18:58:29 2022
 @author: Ujjawal.K.Panchal
 """
 
-import argparse
+import argparse, time
 import torch
+import torch.nn.functional as F
 import torchvision.datasets as datasets
+from torchvision import transforms
 
-from functools import partial
+from tqdm import tqdm
 from model import CNN
+from typing import Union
 
 #static_vars.
 SUPPORTED_DATASETS = ["MNIST", "Fashion"]
@@ -45,7 +48,7 @@ def load_model(
 def load_dataset(
     dname: str = SUPPORTED_DATASETS[0],
     root: str = "./data",
-    transform = None,
+    transform = transforms.ToTensor(),
     download: bool = True,
     **kwargs
 ) -> datasets:
@@ -89,6 +92,60 @@ def get_dataLoader(
                 )
     return dLoader
 
+def train(
+    model: torch.nn.Module,
+    train_loader: torch.utils.data.DataLoader,
+    epochs: int = 1,
+    lr: float = 1E-3,
+    device: Union[str, torch.device] = "cpu",
+    optimizer: torch.optim = torch.optim.Adam,
+    loss_fn: torch.nn = torch.nn.CrossEntropyLoss(),
+
+) -> torch.nn.Module:
+    """
+    Train a network on a given dataset iterable.
+    ---
+    Args:
+        1. model: torch.nn.Module (req) = model which to train.
+        2. train_loader: torch.utils.data.DataLoader (req) = train set iterable.
+        3. test_loader: torch.utils.data.DataLoader (req) = test set iterable.
+    """
+    model.to(device)
+
+    model.train()
+    optimizer = optimizer(model.parameters(), lr = lr)
+    softmax = F.softmax
+    correct = 0
+    total = 0
+    total_loss = 0 
+
+    #0. run n epochs.
+    for epoch in range(epochs):
+        with tqdm(train_loader, unit = "batch") as train_epoch:
+            #1. set some bat stats.
+            train_epoch.set_description(f"E {epoch}, loss: {total_loss:.2f}, train acc: {correct * 100 /total if total else total:.2f}%")
+            total_loss = 0
+            correct = 0
+            total = 0
+            for data, target in train_epoch:
+                #2. get data and predict.
+                data, target = data.to(device), target.to(device)
+                optimizer.zero_grad()
+                output = softmax(model(data), dim = 1)
+                preds = output.argmax(dim = 1)
+
+                
+                #3. calculate loss & backpropogate gradients.
+                loss = loss_fn(output, target)
+                loss.backward()
+                optimizer.step()
+
+                #4. some intermediate stat collection.
+                correct += (preds == target).sum().item()
+                total += len(preds)
+                total_loss += loss.item()
+    return model
+
 #unit test.
 if __name__ == "__main__":
     print(f"unit tests for the pipeline module.")
@@ -99,10 +156,15 @@ if __name__ == "__main__":
 
     #2. load_datasets.
     train_set, test_set = load_dataset(
-        SUPPORTED_DATASETS[0]
+        SUPPORTED_DATASETS[0],
+
     )
     print(f"load_dataset() works fine.")
 
     #3. get_dataLoader.
-    loader = get_dataLoader(test_set)
+    loader = get_dataLoader(test_set, batch_size=512)
     print(f"get_dataLoader() works fine.")
+
+    #4. train.
+    model = train(model, loader)
+    print(f"train() works fine.")
