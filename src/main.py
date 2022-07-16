@@ -20,7 +20,10 @@ DATASET = "MNIST"
 
 
 if __name__ == "__main__":
-	#1. load our model.
+	#1. load dataset.
+	assert DATASET in pipeline.SUPPORTED_DATASETS, f"<!>: DATASET: {DATASET} not supported." 
+
+	#2. load our model.
 	model = pipeline.load_model(model.CNN, DEVICE, NUMCHANNELS)
 
 

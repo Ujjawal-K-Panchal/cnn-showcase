@@ -6,12 +6,21 @@ Created on Mon Jul 16 18:58:29 2022
 
 @author: Ujjawal.K.Panchal
 """
+
 import argparse
 import torch
+import torchvision.datasets as datasets
 
+from functools import partial
 from model import CNN
 
-#device mapper.
+#static_vars.
+SUPPORTED_DATASETS = ["MNIST", "Fashion"]
+
+dataset_loaders = {
+    "MNIST" :  datasets.MNIST,
+    "Fashion": datasets.FashionMNIST,
+}
 
 #load model.
 def load_model(
@@ -32,13 +41,46 @@ def load_model(
     model = model_class(*args, **kwargs).to(device)
     return model
 
+#load dataset.
+def load_dataset(
+    dname: str = SUPPORTED_DATASETS[0],
+    root: str = "./data",
+    transform = None,
+    download: bool = True,
+    **kwargs
+):
+    """
+        load_dataset() helps the user to load any dataset from supported ones.
+    """
+    train_set = dataset_loaders[dname](
+                        root = root,
+                        train = True,
+                        transform = transform,
+                        download = download,
+                        **kwargs
+                    
+                )
+    test_set = dataset_loaders[dname](
+                        root = root,
+                        train = False,
+                        transform = transform,
+                        download = download,
+                        **kwargs
+                )
+    return  train_set, test_set
+
 
 
 #unit test.
 if __name__ == "__main__":
     print(f"unit tests for the pipeline module.")
     
-    #1. loadmodels.
+    #1. load_models.
     model = load_model(CNN, c = 1)
     print(f"load_model() works fine.")
 
+    #2. load_datasets.
+    train_set, test_set = load_dataset(
+        SUPPORTED_DATASETS[0]
+    )
+    print(f"load_dataset() works fine.")
