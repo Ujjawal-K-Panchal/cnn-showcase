@@ -48,7 +48,7 @@ def load_dataset(
     transform = None,
     download: bool = True,
     **kwargs
-):
+) -> datasets:
     """
         load_dataset() helps the user to load any dataset from supported ones.
     """
@@ -70,7 +70,24 @@ def load_dataset(
                 )
     return  train_set, test_set
 
-
+def get_dataLoader(
+    dset,
+    batch_size: int = 32,
+    shuffle: bool = False
+) -> torch.utils.data.DataLoader:
+    """
+    Get an iterable form for the dataset.
+    ---
+    Args:
+        1. batch_size: int (default = 32) = size of each batch coming out of the set.
+        2. shuffle: bool (default = True) = if to or not to shuffle the dataset when creating batches.
+    """
+    dLoader = torch.utils.data.DataLoader(
+                        dset,
+                        batch_size = batch_size,
+                        shuffle = shuffle
+                )
+    return dLoader
 
 #unit test.
 if __name__ == "__main__":
@@ -85,3 +102,7 @@ if __name__ == "__main__":
         SUPPORTED_DATASETS[0]
     )
     print(f"load_dataset() works fine.")
+
+    #3. get_dataLoader.
+    loader = get_dataLoader(test_set)
+    print(f"get_dataLoader() works fine.")
