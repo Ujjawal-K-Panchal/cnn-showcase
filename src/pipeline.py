@@ -52,6 +52,7 @@ def load_dataset(
     """
         load_dataset() helps the user to load any dataset from supported ones.
     """
+    assert dname in SUPPORTED_DATASETS, f"<!>: DATASET: `{dname}` not supported." 
     train_set = dataset_loaders[dname](
                         root = root,
                         train = True,
