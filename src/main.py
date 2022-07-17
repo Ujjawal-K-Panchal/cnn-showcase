@@ -15,11 +15,15 @@ import model, pipeline
 
 #static vars.
 LR = 1E-3
-BS = 512
+BS = 128
 EPOCHS = 100
-DEVICE = "cpu" if not torch.cuda.is_available() else "cuda:0"
+DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 NUMCHANNELS = 1
 DATASET = "MNIST"
+SEED = 42
+
+#set torch seed for determinacy.
+torch.manual_seed(42)
 
 
 if __name__ == "__main__":
@@ -57,6 +61,15 @@ if __name__ == "__main__":
 					LR,
 					DEVICE,
 			)
+	
+	#4. test model.
+	print("Testing on test set:")
+	accuracy, f1, cm = pipeline.test(
+							model,
+							test_loader,
+							DEVICE
+						)
+	print(f"Accuracy: {accuracy*100:.2f}%\nF1 score: {f1}\nconfusion matrix:\n{cm}")
 
 
 

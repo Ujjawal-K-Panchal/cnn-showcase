@@ -11,7 +11,9 @@ import argparse, time
 import torch
 import torch.nn.functional as F
 import torchvision.datasets as datasets
+
 from torchvision import transforms
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 
 from tqdm import tqdm
 from model import CNN
@@ -48,7 +50,7 @@ def load_model(
 def load_dataset(
     dname: str = SUPPORTED_DATASETS[0],
     root: str = "./data",
-    transform = transforms.ToTensor(),
+    transform: transforms = transforms.ToTensor(),
     download: bool = True,
     **kwargs
 ) -> datasets:
@@ -146,6 +148,43 @@ def train(
                 total_loss += loss.item()
     return model
 
+def test(
+    model: torch.nn.Module,
+    test_loader: torch.utils.data.DataLoader,
+    device: Union[str, torch.device] = "cpu",
+) -> tuple:
+    """
+    Test a given model on a test set sharded iterable.
+    ---
+    Args:
+        1. model: torch.nn.Module = Model that is to be tested.
+        2. test_loader: torch.utils.data.DataLoader = Iterable sharded/batched test set. 
+    """
+    #0. make settings.
+    model.eval()
+    y_pred, y_truth = [], []
+    test_bar = tqdm(test_loader, unit = "batch")
+    
+    #1. iterate through the test set.
+    for i, (x, y) in enumerate(test_bar):
+        test_bar.set_description(f"Testing batch: {i:3d}")
+        x, y = x.to(device), y.to(device)
+        
+        #2. make predictions.
+        outputs = model(x)
+        predictions = F.softmax(outputs, dim = 1).argmax(dim = 1)
+        
+        #3. store predictions and truth.
+        y_truth.extend(y.detach().cpu().numpy())
+        y_pred.extend(predictions.detach().cpu().numpy())
+    test_bar.close()
+    
+    #3. calculate scores.
+    accuracy = accuracy_score(y_truth, y_pred)
+    f1 = f1_score(y_truth, y_pred, average = None)
+    cm = confusion_matrix(y_truth, y_pred, labels = [x for x in range(1, 11)])
+    return accuracy, list(f1), cm
+
 #unit test.
 if __name__ == "__main__":
     print(f"unit tests for the pipeline module.")
@@ -168,3 +207,8 @@ if __name__ == "__main__":
     #4. train.
     model = train(model, loader)
     print(f"train() works fine.")
+
+    #5, test.
+    acc, f1, cm = test(model, loader)
+    print(f"{acc=}\n{f1=}\n{cm=}")
+    print("test() works fine.")
