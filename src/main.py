@@ -27,7 +27,8 @@ DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 NUMCHANNELS = 1
 DATASET = "MNIST"
 SEED = 42
-SAVENAME = "MyCNN"
+MODELNAME = "MyCNN"
+SAVENAME = f"{DATASET}-{MODELNAME}"
 
 #set torch seed for determinacy.
 torch.manual_seed(42)
