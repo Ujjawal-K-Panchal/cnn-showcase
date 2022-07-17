@@ -53,7 +53,7 @@ class CNN(nn.Module):
 		Description:
 			Propogate the input through the network.
 		Args:
-			1. x  (type: int, shape: batchsize, channels, height, width) := the input batch.
+			1. x (type: int, shape: batchsize, channels, height, width) := the input batch.
 		"""
 		x = self.mp1(self.act1(self.conv1(x)))
 		x = self.mp2(self.act2(self.conv2(x)))
