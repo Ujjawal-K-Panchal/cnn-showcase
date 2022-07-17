@@ -71,6 +71,8 @@ if __name__ == "__main__":
 						)
 	print(f"Accuracy: {accuracy*100:.2f}%\nF1 score: {f1}\nconfusion matrix:\n{cm}")
 
+	#5. save torch model.
+
 
 
 
