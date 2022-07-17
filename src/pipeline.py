@@ -7,13 +7,14 @@ Created on Mon Jul 16 18:58:29 2022
 @author: Ujjawal.K.Panchal
 """
 
-import argparse, time
+import argparse, time, os
 import torch
 import torch.nn.functional as F
 import torchvision.datasets as datasets
 
 from torchvision import transforms
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
+from pathlib import Path
 
 from tqdm import tqdm
 from model import CNN
@@ -28,7 +29,7 @@ dataset_loaders = {
 }
 
 #load model.
-def load_model(
+def make_model(
     model_class: torch.nn.Module = CNN,
     device: str = "cpu",
     *args, **kwargs
@@ -185,13 +186,60 @@ def test(
     cm = confusion_matrix(y_truth, y_pred, labels = [x for x in range(1, 11)])
     return accuracy, list(f1), cm
 
+
+def save_model(
+    model: torch.nn.Module,
+    modelname: str = "CNN",
+    overwrite: bool = True
+
+) -> Path:
+    """
+    Save the weights of a given model with a particular name inside snapshots/.
+    ---
+    Args:
+        1. model: torch.nn.Module = Model that is to be tested.
+        2. modelname: str (default = "CNN") = Name under which to save.
+    """
+    #0. do some checks.
+    assert (" " not in modelname), f"<!>: Name cannot have spaces in it."
+
+
+    savepath = Path("snapshots", f"{modelname}.model")
+
+    if (os.path.exists(savepath) and not overwrite):
+        raise Exception("<!>: a model is already saved under this name.")
+
+    elif os.path.exists(savepath):
+        os.remove(savepath)
+
+    #1. Make modelpath.
+    torch.save(model.state_dict(), savepath)
+
+    #2. return savepath.
+    return savepath
+
+def load_model(
+    model: torch.nn.Module,
+    modelname: str = "CNN",
+) -> torch.nn.Module:
+    """
+    Load model from the snapshots/ directory.
+    ---
+    Args:
+        1. model: torch.nn.Module = source model on which to override with saved weights.
+        2. modelname: str (default = "CNN") = model name which was previously saved in snapshots/ folder.
+    """
+    loadpath = Path("snapshots", f"{modelname}.model")
+    model.load_state_dict(torch.load(loadpath))
+    return model
+
 #unit test.
 if __name__ == "__main__":
     print(f"unit tests for the pipeline module.")
     
-    #1. load_models.
-    model = load_model(CNN, c = 1)
-    print(f"load_model() works fine.")
+    #1. make_models.
+    model = make_model(CNN, c = 1)
+    print(f"make_model() works fine.")
 
     #2. load_datasets.
     train_set, test_set = load_dataset(
@@ -208,7 +256,16 @@ if __name__ == "__main__":
     model = train(model, loader)
     print(f"train() works fine.")
 
-    #5, test.
+    #5. test.
     acc, f1, cm = test(model, loader)
     print(f"{acc=}\n{f1=}\n{cm=}")
     print("test() works fine.")
+
+    #6. save model.
+    save_model(model)
+    print("save_model() works fine.")
+
+    #7. load model.
+    load_model(model)
+    print(f"load_model() works fine.")
+

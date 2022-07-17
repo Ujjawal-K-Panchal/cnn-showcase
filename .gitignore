@@ -9,6 +9,8 @@ venv4*/
 
 #no snapshots.
 **/snapshots/*
+*.model
+
 
 #no python stuff.
 **/__pycache__/**

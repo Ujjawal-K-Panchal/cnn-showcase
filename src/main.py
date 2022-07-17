@@ -16,11 +16,12 @@ import model, pipeline
 #static vars.
 LR = 1E-3
 BS = 128
-EPOCHS = 100
+EPOCHS = 1
 DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 NUMCHANNELS = 1
 DATASET = "MNIST"
 SEED = 42
+SAVENAME = "MyCNN"
 
 #set torch seed for determinacy.
 torch.manual_seed(42)
@@ -51,7 +52,7 @@ if __name__ == "__main__":
 					)
 
 	#2. load our model.
-	model = pipeline.load_model(model.CNN, DEVICE, NUMCHANNELS)
+	model = pipeline.make_model(model.CNN, DEVICE, NUMCHANNELS)
 
 	#3. train our model with given iterable shards of batches.
 	model = pipeline.train(
@@ -72,6 +73,8 @@ if __name__ == "__main__":
 	print(f"Accuracy: {accuracy*100:.2f}%\nF1 score: {f1}\nconfusion matrix:\n{cm}")
 
 	#5. save torch model.
+	savepath = pipeline.save_model(model, SAVENAME)
+	print(f"Saved current model in path: {savepath}")
 
 
 
