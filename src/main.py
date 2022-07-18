@@ -22,7 +22,7 @@ import model, pipeline
 #static vars.
 LR = 1E-3
 BS = 128
-EPOCHS = 1
+EPOCHS = 100
 DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 NUMCHANNELS = 1
 DATASET = "MNIST"
