@@ -59,7 +59,7 @@ class CNN(nn.Module):
 		x = self.mp2(self.act2(self.conv2(x)))
 		x = self.flattener(x)
 		x = self.relu(self.fc1(x))
-		x = self.relu(self.fc2(x))
+		x = self.fc2(x)
 		return x
 
 if __name__ == "__main__":
