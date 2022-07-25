@@ -218,7 +218,7 @@ def save_model(
         os.remove(savepath)
 
     #1. Make modelpath.
-    torch.save(model.state_dict(), savepath)
+    torch.save(model.cpu().state_dict(), savepath)
 
     #2. return savepath.
     return savepath
@@ -226,6 +226,7 @@ def save_model(
 def load_model(
     model: torch.nn.Module,
     modelname: str = "CNN",
+    device: str = "cpu"
 ) -> torch.nn.Module:
     """
     Load model from the snapshots/ directory.
@@ -236,7 +237,7 @@ def load_model(
     """
     loadpath = Path("snapshots", f"{modelname}.model")
     model.load_state_dict(torch.load(loadpath))
-    return model
+    return model.to(device)
 
 #unit test.
 if __name__ == "__main__":
