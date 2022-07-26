@@ -22,7 +22,7 @@ import model, pipeline
 #static vars.
 LR = 1E-3
 BS = 128
-EPOCHS = 100
+EPOCHS = 10
 DEVICE = "cpu"
 NUMCHANNELS = 1
 DATASET = "MNIST"
