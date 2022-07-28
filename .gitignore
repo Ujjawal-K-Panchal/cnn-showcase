@@ -8,7 +8,7 @@ venv4*/
 **/data/*
 
 #no snapshots.
-**/snapshots/*
+src/snapshots/*
 *.model
 
 
